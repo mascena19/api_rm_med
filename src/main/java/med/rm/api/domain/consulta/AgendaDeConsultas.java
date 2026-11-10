@@ -66,8 +66,8 @@ public class AgendaDeConsultas {
 
         return medicoRepository.escolherMedicoAleatorioLivreNaData(
                         dados.especialidade(),
-                        dados.data(),
-                        PageRequest.of(0, 1)
+                        dados.data()
+
                 )
                 .stream()
                 .findFirst()

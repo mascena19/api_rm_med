@@ -29,8 +29,7 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
         """)
     List<Medico> escolherMedicoAleatorioLivreNaData(
             @Param("especialidade") Especialidade especialidade,
-            @Param("data") @NotNull @Future LocalDateTime data,
-            Pageable paginacao
+            @Param("data") @NotNull @Future LocalDateTime data
     );
     @Query("""
             select m.ativo
