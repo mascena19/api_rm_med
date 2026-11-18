@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import med.rm.api.domain.usuario.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,11 +18,16 @@ import java.util.Collections;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    public SecurityFilter(
+            TokenService tokenService,
+            UsuarioRepository usuarioRepository
+    ) {
+        this.tokenService = tokenService;
+        this.usuarioRepository = usuarioRepository;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -40,15 +44,18 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             var usuario = usuarioRepository.findByLogin(subject);
 
-           var authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            usuario,
-                            null,
-                            Collections.emptyList()
-                    );
+            if (usuario != null) {
 
-           SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+                var authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                usuario,
+                                null,
+                                Collections.emptyList()
+                        );
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -56,13 +63,13 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private String recuperarToken(HttpServletRequest request) {
 
-        var authorizationHeader =
-                request.getHeader("Authorization");
+        var authorizationHeader = request.getHeader("Authorization");
 
-        if (authorizationHeader != null ) {
-            return authorizationHeader.substring(7);
+        if (authorizationHeader == null ||
+                !authorizationHeader.startsWith("Bearer ")) {
+            return null;
         }
 
-        return null;
+        return authorizationHeader.substring(7);
     }
 }

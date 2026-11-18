@@ -25,14 +25,10 @@ public class ConsultaController {
     @Transactional
     public ResponseEntity agendar(@RequestBody @Valid DadosAgendamentoConsulta dados) {
 
-        var dto =agenda.agendar(dados);
+        var dto = agenda.agendar(dados);
 
         return ResponseEntity.ok(dto);
     }
-
-
-
-
 }
 
 
